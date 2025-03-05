@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ombak - Tide & Weather App</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #64FFDA;
+            --secondary: #8892B0;
+            --background: #0A192F;
+            --surface: #112240;
+            --text: #CCD6F6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0A192F 0%, #112240 50%, #0A192F 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .theme-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, #38BDF8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+    </style>
+</head>
+<body class="p-6">
+    <main class="max-w-7xl mx-auto">
+        <!-- 24-Hour Temperature Analysis -->
+        <div class="glass-card gradient-border rounded-xl p-6 mb-8">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[var(--primary)]/10 flex items-center justify-center">
+                        <i class="fas fa-temperature-high text-[var(--primary)] text-xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold theme-gradient">24-Hour Analysis</h3>
+                </div>
+                <div class="flex gap-2">
+                    <button class="bg-[var(--primary)]/10 hover:bg-[var(--primary)]/20 text-[var(--primary)] px-4 py-2 rounded-lg transition-all duration-300">
+                        Temperature
+                    </button>
+                    <button class="bg-[var(--surface)] hover:bg-[var(--primary)]/10 text-[var(--secondary)] px-4 py-2 rounded-lg transition-all duration-300">
+                        Humidity
+                    </button>
+                </div>
+            </div>
+
+            <!-- Temperature Chart -->
+            <div class="relative w-full h-[300px] mb-6">
+                <canvas id="tempChart"></canvas>
+            </div>
+
+            <!-- Current Conditions -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="glass-card p-4 rounded-lg hover:bg-[var(--primary)]/5 transition-all duration-300 group">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-temperature-high text-[var(--primary)] opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                        <div class="text-[var(--secondary)] group-hover:text-[var(--primary)] transition-colors">Current</div>
+                    </div>
+                    <div class="text-2xl font-bold text-[var(--primary)]">28°C</div>
+                    <div class="text-[var(--secondary)]/70 text-sm group-hover:text-[var(--secondary)] transition-colors">Feels like 30°C</div>
+                </div>
+                <div class="glass-card p-4 rounded-lg hover:bg-[var(--primary)]/5 transition-all duration-300 group">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-arrow-up-arrow-down text-[var(--primary)] opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                        <div class="text-[var(--secondary)] group-hover:text-[var(--primary)] transition-colors">High/Low</div>
+                    </div>
+                    <div class="text-2xl font-bold text-[var(--primary)]">31°/24°</div>
+                    <div class="text-[var(--secondary)]/70 text-sm group-hover:text-[var(--secondary)] transition-colors">Daily Range</div>
+                </div>
+                <div class="glass-card p-4 rounded-lg hover:bg-[var(--primary)]/5 transition-all duration-300 group">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-droplet text-[var(--primary)] opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                        <div class="text-[var(--secondary)] group-hover:text-[var(--primary)] transition-colors">Humidity</div>
+                    </div>
+                    <div class="text-2xl font-bold text-[var(--primary)]">65%</div>
+                    <div class="text-[var(--secondary)]/70 text-sm group-hover:text-[var(--secondary)] transition-colors">Moderate</div>
+                </div>
+                <div class="glass-card p-4 rounded-lg hover:bg-[var(--primary)]/5 transition-all duration-300 group">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-sun text-[var(--primary)] opacity-70 group-hover:opacity-100 transition-opacity"></i>
+                        <div class="text-[var(--secondary)] group-hover:text-[var(--primary)] transition-colors">UV Index</div>
+                    </div>
+                    <div class="text-2xl font-bold text-[var(--primary)]">8</div>
+                    <div class="text-[var(--secondary)]/70 text-sm group-hover:text-[var(--secondary)] transition-colors">Very High</div>
+                </div>
+            </div>
+
+            <!-- 24-Hour Timeline -->
+            <div class="overflow-x-auto">
+                <div class="flex gap-4 min-w-max py-4" id="hourly-timeline">
+                    <!-- Hours will be dynamically inserted by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Temperature Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('tempChart').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(100, 255, 218, 0.2)');
+            gradient.addColorStop(1, 'rgba(100, 255, 218, 0)');
+
+            const hourlyTemp = Array.from({length: 24}, (_, i) => ({
+                hour: `${String(i).padStart(2, '0')}:00`,
+                temp: Math.round(25 + Math.sin(i/3) * 5)
+            }));
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: hourlyTemp.map(h => h.hour),
+                    datasets: [{
+                        label: 'Temperature',
+                        data: hourlyTemp.map(h => h.temp),
+                        borderColor: 'rgba(100, 255, 218, 1)',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: 'rgba(100, 255, 218, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 34, 64, 0.9)',
+                            titleColor: '#64FFDA',
+                            bodyColor: '#CCD6F6',
+                            padding: 12,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(136, 146, 176, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: 'rgba(204, 214, 246, 0.8)',
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: 'rgba(204, 214, 246, 0.8)',
+                                font: {
+                                    family: 'Inter'
+                                },
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 12
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Generate hourly timeline
+            const timeline = document.getElementById('hourly-timeline');
+            hourlyTemp.forEach(({hour, temp}) => {
+                const hourDiv = document.createElement('div');
+                hourDiv.className = 'glass-card p-3 rounded-lg min-w-[100px] text-center hover:bg-[var(--primary)]/5 transition-colors';
+                hourDiv.innerHTML = `
+                    <div class="text-[var(--secondary)] text-sm">${hour}</div>
+                    <div class="text-[var(--primary)] font-semibold my-2">${temp}°C</div>
+                    <i class="fas ${parseInt(hour) > 6 && parseInt(hour) < 18 ? 'fa-sun text-amber-400' : 'fa-moon text-blue-300'}"></i>
+                `;
+                timeline.appendChild(hourDiv);
+            });
+        });
+    </script>
+</body>
+</html>
